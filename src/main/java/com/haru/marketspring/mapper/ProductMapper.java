@@ -1,23 +1,27 @@
 package com.haru.marketspring.mapper;
 
-import com.haru.marketspring.dto.product.ProductRequestDTO;
-import com.haru.marketspring.dto.product.ProductResponseDTO;
-import com.haru.marketspring.entity.Category;
+import com.haru.marketspring.dto.product.ProductRequest;
+import com.haru.marketspring.dto.product.ProductResponse;
 import com.haru.marketspring.entity.Product;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
+import org.mapstruct.NullValuePropertyMappingStrategy;
 
-@Mapper(componentModel = "spring", uses = {CategoryMapper.class})
+@Mapper(
+        componentModel = "spring",
+        uses = {CategoryMapper.class},
+        nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE
+)
 public interface ProductMapper {
 
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "category", source = "category")
-    Product toEntity(ProductRequestDTO dto, Category category);
+    @Mapping(target = "category", ignore = true)
+    Product toEntity(ProductRequest dto);
 
-    ProductResponseDTO toResponse(Product product);
+    ProductResponse toResponse(Product entity);
 
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "category", ignore = true) // Category is updated separately
-    void updateEntityFromDto(ProductRequestDTO dto, @MappingTarget Product product);
+    @Mapping(target = "category", ignore = true)
+    void updateEntityFromDto(ProductRequest dto, @MappingTarget Product entity);
 }

@@ -8,6 +8,7 @@ import com.haru.marketspring.exception.ConflictException;
 import com.haru.marketspring.exception.ResourceNotFoundException;
 import com.haru.marketspring.mapper.CategoryMapper;
 import com.haru.marketspring.repository.CategoryRepository;
+import com.haru.marketspring.repository.ProductRepository;
 import com.haru.marketspring.service.CategoryService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,11 +20,14 @@ import java.util.List;
 public class CategoryServiceImpl implements CategoryService {
 
     private final CategoryRepository categoryRepository;
+    private final ProductRepository productRepository;
     private final CategoryMapper categoryMapper;
 
     public CategoryServiceImpl(CategoryRepository categoryRepository,
+                               ProductRepository productRepository,
                                CategoryMapper categoryMapper) {
         this.categoryRepository = categoryRepository;
+        this.productRepository = productRepository;
         this.categoryMapper = categoryMapper;
     }
 
@@ -81,10 +85,10 @@ public class CategoryServiceImpl implements CategoryService {
                 .orElseThrow(() ->
                         new ResourceNotFoundException("Category not found with id: " + id));
 
-        // TODO: When Product entity/repository is available, check if products are associated
-        // if (productRepository.existsByCategoryId(id)) {
-        //     throw new BadRequestException("Cannot delete category with associated products");
-        // }
+        // Check if there are associated products
+        if (productRepository.existsByCategoryId(id)) {
+            throw new BadRequestException("Cannot delete category with associated products");
+        }
 
         categoryRepository.delete(existing);
     }

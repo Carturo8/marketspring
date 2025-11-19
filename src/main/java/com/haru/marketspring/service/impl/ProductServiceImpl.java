@@ -31,15 +31,15 @@ public class ProductServiceImpl implements ProductService {
     @Override
     @Transactional
     public ProductResponse createProduct(ProductRequest productRequest) {
-        // 1. Find the category
+        //Find the category
         Category category = categoryRepository.findById(productRequest.categoryId())
                 .orElseThrow(() -> new ResourceNotFoundException("Category not found with id: " + productRequest.categoryId()));
 
-        // 2. Map DTO to Entity
+        //Map DTO to Entity
         Product product = productMapper.toEntity(productRequest);
         product.setCategory(category);
 
-        // 3. Save and return
+        //Save and return
         Product savedProduct = productRepository.save(product);
         return productMapper.toResponse(savedProduct);
     }
@@ -62,21 +62,21 @@ public class ProductServiceImpl implements ProductService {
     @Override
     @Transactional
     public ProductResponse updateProduct(Long id, ProductRequest productRequest) {
-        // 1. Find the existing product
+        //Find the existing product
         Product existingProduct = productRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + id));
 
-        // 2. Update from DTO
+        //Update from DTO
         productMapper.updateEntityFromDto(productRequest, existingProduct);
 
-        // 3. If categoryId is present, update the category
+        //If categoryId is present, update the category
         if (productRequest.categoryId() != null) {
             Category category = categoryRepository.findById(productRequest.categoryId())
                     .orElseThrow(() -> new ResourceNotFoundException("Category not found with id: " + productRequest.categoryId()));
             existingProduct.setCategory(category);
         }
 
-        // 4. Save and return
+        //Save and return
         Product updatedProduct = productRepository.save(existingProduct);
         return productMapper.toResponse(updatedProduct);
     }

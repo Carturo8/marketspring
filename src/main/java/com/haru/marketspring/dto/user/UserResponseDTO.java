@@ -1,0 +1,8 @@
+package com.haru.marketspring.dto.user;
+
+public record UserResponseDTO(
+        Long id,
+        String username,
+        String email
+) {
+}

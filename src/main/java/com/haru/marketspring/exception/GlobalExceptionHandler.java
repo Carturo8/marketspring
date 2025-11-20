@@ -9,8 +9,10 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.context.request.WebRequest;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestControllerAdvice
 @Slf4j
@@ -43,6 +45,18 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(body);
     }
 
+    @ExceptionHandler(GenericNotFoundException.class)
+    public ResponseEntity<ApiErrorResponse> handleGenericNotFoundException(GenericNotFoundException ex, WebRequest request) {
+        ApiErrorResponse errorResponse = ApiErrorResponse.of(ex.getMessage(), "NOT_FOUND");
+        return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ApiErrorResponse> handleIllegalArgumentException(IllegalArgumentException ex, WebRequest request) {
+        ApiErrorResponse errorResponse = ApiErrorResponse.of(ex.getMessage(), "BAD_REQUEST");
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+    }
+
     // Bean Validation (@Valid on DTOs) errors
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiErrorResponse> handleValidationErrors(MethodArgumentNotValidException ex) {
@@ -50,7 +64,7 @@ public class GlobalExceptionHandler {
                 .getFieldErrors()
                 .stream()
                 .map(this::formatFieldError)
-                .toList();
+                .collect(Collectors.toList());
 
         ApiErrorResponse body = ApiErrorResponse.of(
                 "Validation failed",
@@ -66,7 +80,7 @@ public class GlobalExceptionHandler {
         List<String> details = ex.getConstraintViolations()
                 .stream()
                 .map(violation -> violation.getPropertyPath() + ": " + violation.getMessage())
-                .toList();
+                .collect(Collectors.toList());
 
         ApiErrorResponse body = ApiErrorResponse.of(
                 "Constraint violation",
